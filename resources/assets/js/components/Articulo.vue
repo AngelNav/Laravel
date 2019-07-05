@@ -49,12 +49,14 @@
                                         <i class="icon-pencil"></i>
                                     </button> &nbsp;
                                     <template v-if="articulo.condicion">
-                                        <button type="button" class="btn btn-danger btn-sm" @click="desactivarArticulo(articulo.id)">
+                                        <button type="button" class="btn btn-danger btn-sm"
+                                            @click="desactivarArticulo(articulo.id)">
                                             <i class="icon-trash"></i>
                                         </button>
                                     </template>
                                     <template v-else>
-                                        <button type="button" class="btn btn-info btn-sm" @click="activarArticulo(articulo.id)">
+                                        <button type="button" class="btn btn-info btn-sm"
+                                            @click="activarArticulo(articulo.id)">
                                             <i class="icon-check"></i>
                                         </button>
                                     </template>
@@ -126,6 +128,9 @@
                                 <div class="col-md-9">
                                     <input type="text" v-model="codigo" class="form-control"
                                         placeholder="Código de barras">
+                                    <barcode :value="codigo" :options="{ format: 'EAN-13' }">
+                                        Generando código de barras
+                                    </barcode>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -181,6 +186,7 @@
 </template>
 
 <script>
+    import VueBarcode from 'vue-barcode';
     export default {
         data() {
             return {
@@ -211,6 +217,9 @@
                 buscar: '',
                 arrayCategoria: []
             }
+        },
+        components: {
+            'barcode': VueBarcode
         },
         computed: {
             isActived: function () {
@@ -316,17 +325,20 @@
                 });
             },
             desactivarArticulo(id) {
-                swal({
+                const swalWithBootstrapButtons = Swal.mixin({
+                    customClass: {
+                        confirmButton: 'btn btn-success',
+                        cancelButton: 'btn btn-danger'
+                    },
+                    buttonsStyling: false,
+                })
+
+                swalWithBootstrapButtons.fire({
                     title: '¿Está seguro de desactivar este artículo?',
                     type: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Aceptar!',
+                    confirmButtonText: 'Aceptar',
                     cancelButtonText: 'Cancelar',
-                    confirmButtonClass: 'btn btn-success',
-                    cancelButtonClass: 'btn btn-danger',
-                    buttonsStyling: false,
                     reverseButtons: true
                 }).then((result) => {
                     if (result.value) {
@@ -336,7 +348,7 @@
                             'id': id
                         }).then(function (response) {
                             me.listarArticulo(1, '', 'nombre');
-                            swal(
+                            swalWithBootstrapButtons.fire(
                                 'Desactivado!',
                                 'El registro ha sido desactivado con éxito.',
                                 'success'
@@ -345,27 +357,28 @@
                             console.log(error);
                         });
 
-
                     } else if (
                         // Read more about handling dismissals
-                        result.dismiss === swal.DismissReason.cancel
+                        result.dismiss === Swal.DismissReason.cancel
                     ) {
-
                     }
                 })
             },
             activarArticulo(id) {
-                swal({
-                    title: '¿Está seguro de activar esta artículo?',
+                const swalWithBootstrapButtons = Swal.mixin({
+                    customClass: {
+                        confirmButton: 'btn btn-success',
+                        cancelButton: 'btn btn-danger'
+                    },
+                    buttonsStyling: false,
+                })
+
+                swalWithBootstrapButtons.fire({
+                    title: '¿Está seguro de activar este artículo?',
                     type: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Aceptar!',
+                    confirmButtonText: 'Aceptar',
                     cancelButtonText: 'Cancelar',
-                    confirmButtonClass: 'btn btn-success',
-                    cancelButtonClass: 'btn btn-danger',
-                    buttonsStyling: false,
                     reverseButtons: true
                 }).then((result) => {
                     if (result.value) {
@@ -375,21 +388,19 @@
                             'id': id
                         }).then(function (response) {
                             me.listarArticulo(1, '', 'nombre');
-                            swal(
+                            swalWithBootstrapButtons.fire(
                                 'Activado!',
-                                'El registro ha sido activado con éxito.',
+                                'El registro ha sido desactivado con éxito.',
                                 'success'
                             )
                         }).catch(function (error) {
                             console.log(error);
                         });
 
-
                     } else if (
                         // Read more about handling dismissals
-                        result.dismiss === swal.DismissReason.cancel
+                        result.dismiss === Swal.DismissReason.cancel
                     ) {
-
                     }
                 })
             },
