@@ -14,10 +14,18 @@ class CategoriaController extends Controller
      */
     public function index()
     {
+        if (!$request->ajax()) return redirect('/');
         $categorias = Categoria::all();
         return $categorias;
     }   
 
+    public function selectCategoria(Request $request)
+    {
+        if (!$request->ajax()) return redirect('/');
+        $categorias = Categoria::where('condicion', '=', '1')
+        ->select('id', 'nombre')->orderBy('nombre', 'asc')->get();
+        return['categorias' => $categorias];
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -26,6 +34,7 @@ class CategoriaController extends Controller
      */
     public function store(Request $request)
     {
+        if (!$request->ajax()) return redirect('/');
         $categoria = new Categoria();
         $categoria->nombre = $request->nombre;
         $categoria->descripcion = $request->descripcion;
@@ -43,6 +52,7 @@ class CategoriaController extends Controller
      */
     public function update(Request $request)
     {
+        if (!$request->ajax()) return redirect('/');
         $categoria = Categoria::findOrFail($request->id);
         $categoria->nombre = $request->nombre;
         $categoria->descripcion = $request->descripcion;
@@ -52,6 +62,7 @@ class CategoriaController extends Controller
 
     public function desactivar(Request $request)
     {
+        if (!$request->ajax()) return redirect('/');
         $categoria = Categoria::findOrFail($request->id);
         $categoria->condicion = '0';
         $categoria->save();
@@ -59,6 +70,7 @@ class CategoriaController extends Controller
 
     public function activar(Request $request)
     {
+        if (!$request->ajax()) return redirect('/');
         $categoria = Categoria::findOrFail($request->id);
         $categoria->condicion = '1';
         $categoria->save();
