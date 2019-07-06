@@ -19,6 +19,7 @@
         "vue": "^2.5.7"
     },
     "dependencies": {
-        "sweetalert2": "^8.13.0"
+        "sweetalert2": "^8.13.0",
+        "vue-barcode": "^1.2.0"
     }
 }
