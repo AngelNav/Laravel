@@ -31,3 +31,16 @@ Route::put('/articulo/activar', 'ArticuloController@activar');
 Route::get('/client', 'ClientController@index');
 Route::post('/client/store', 'ClientController@store');
 Route::put('/client/update', 'ClientController@update');
+
+Route::get('/supplier', 'SupplierController@index');
+Route::post('/supplier/store', 'SupplierController@store');
+Route::put('/supplier/update', 'SupplierController@update');
+
+Route::get('/rol', 'RolController@index');
+Route::get('/rol/selectRol', 'RolController@selectRol');
+
+Route::get('/user', 'UserController@index');
+Route::post('/user/store', 'UserController@store');
+Route::put('/user/update', 'UserController@update');
+Route::put('/user/deactivate', 'UserController@deactivate');
+Route::put('/user/activate', 'UserController@activate');

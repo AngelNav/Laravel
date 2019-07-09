@@ -8,7 +8,7 @@
             <!-- Ejemplo de tabla Listado -->
             <div class="card">
                 <div class="card-header">
-                    <i class="fa fa-align-justify"></i> Clientes
+                    <i class="fa fa-align-justify"></i> Usuario(*)
                     <button type="button" @click="openModal('person','store')" class="btn btn-secondary">
                         <i class="icon-plus"></i>&nbsp;Nuevo
                     </button>
@@ -41,6 +41,8 @@
                                 <th>Dirección</th>
                                 <th>Teléfono</th>
                                 <th>Email</th>
+                                <th>Usuario</th>
+                                <th>Rol</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -50,6 +52,18 @@
                                         class="btn btn-warning btn-sm">
                                         <i class="icon-pencil"></i>
                                     </button> &nbsp;
+                                    <template v-if="person.condition">
+                                        <button type="button" class="btn btn-danger btn-sm"
+                                            @click="deactivateUser(person.id)">
+                                            <i class="icon-trash"></i>
+                                        </button>
+                                    </template>
+                                    <template v-else>
+                                        <button type="button" class="btn btn-info btn-sm"
+                                            @click="activateUser(person.id)">
+                                            <i class="icon-check"></i>
+                                        </button>
+                                    </template>
                                 </td>
                                 <td v-text="person.name"></td>
                                 <td v-text="person.document_type"></td>
@@ -57,6 +71,8 @@
                                 <td v-text="person.address"></td>
                                 <td v-text="person.phone"></td>
                                 <td v-text="person.email"></td>
+                                <td v-text="person.user"></td>
+                                <td v-text="person.rol"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -133,9 +149,34 @@
                             <div class="form-group row">
                                 <label class="col-md-3 form-control-label" for="text-input">Email</label>
                                 <div class="col-md-9">
-                                    <input type="text" v-model="email" class="form-control" placeholder="Email">
+                                    <input type="email" v-model="email" class="form-control" placeholder="Email">
                                 </div>
                             </div>
+                            <div class="form-group row">
+                                    <label class="col-md-3 form-control-label" for="email-input">Rol (*)</label>
+                                    <div class="col-md-9">
+                                        <select class="form-control" v-model="idrol">
+                                            <option value="0">Seleccione un rol</option>
+                                            <option v-for="rol in arrayRol" :key="rol.id" :value="rol.id" v-text="rol.name">
+
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group row">
+                                    <label class="col-md-3 form-control-label" for="email-input">Usuario (*)</label>
+                                    <div class="col-md-9">
+                                        <input type="text" v-model="user" class="form-control" placeholder="Nombre de usuario">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-md-3 form-control-label" for="email-input">Password (*)</label>
+                                    <div class="col-md-9">
+                                        <input type="password" v-model="password" class="form-control" placeholder="Password de acceso">
+                                    </div>
+                                </div>
+
                             <div v-show="errorPerson" class="form-group row div-error">
                                 <div class="text-center text-error">
                                     <div v-for="error in errorShowMsgPerson" :key="error" v-text="error">
@@ -176,8 +217,11 @@
                 address: '',
                 phone: '',
                 email: '',
-
+                user: '',
+                password: '',
+                idrol: 0,
                 arrayPerson: [],
+                arrayRol: [],
                 modal: 0,
                 modalTitle: '',
                 actionType: 0,
@@ -227,11 +271,22 @@
         methods: {
             listPerson(page, search, criterion) {
                 let me = this;
-                var url = '/client?page=' + page + '&search=' + search + '&criterion=' + criterion;
+                var url = '/user?page=' + page + '&search=' + search + '&criterion=' + criterion;
                 axios.get(url).then(function (response) {
                     var varResponse = response.data;
                     me.arrayPerson = varResponse.people.data;
                     me.pagination = varResponse.pagination;
+                })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
+            selectRol(){
+                let me = this;
+                var url = '/rol/selectRol';
+                axios.get(url).then(function (response) {
+                    var varResponse = response.data;
+                    me.arrayRol = varResponse.roles;
                 })
                     .catch(function (error) {
                         console.log(error);
@@ -251,13 +306,17 @@
 
                 let me = this;
 
-                axios.post('/client/store', {
+                axios.post('/user/store', {
                     'name': this.name,
                     'document_type': this.document_type,
                     'document_num': this.document_num,
                     'address': this.address,
                     'phone': this.phone,
-                    'email': this.email
+                    'email': this.email,
+                    'user': this.user,
+                    'password': this.password,
+                    'idrol': this.idrol
+                    
                 }).then(function (response) {
                     me.closeModal();
                     me.listPerson(1, '', 'name');
@@ -272,13 +331,16 @@
 
                 let me = this;
 
-                axios.put('/client/update', {
+                axios.put('/user/update', {
                     'name': this.name,
                     'document_type': this.document_type,
                     'document_num': this.document_num,
                     'address': this.address,
                     'phone': this.phone,
                     'email': this.email,
+                    'user': this.user,
+                    'password': this.password,
+                    'idrol': this.idrol,
                     'id': this.person_id
                 }).then(function (response) {
                     me.closeModal();
@@ -292,6 +354,9 @@
                 this.errorShowMsgPerson = [];
 
                 if (!this.name) this.errorShowMsgPerson.push("El nombre de la persona no puede estar vacío.");
+                if (!this.user) this.errorShowMsgPerson.push("El nombre de usuario no puede estar vacío.");
+                if (!this.password) this.errorShowMsgPerson.push("El password no puede estar vacío.");
+                if (this.idrol==0) this.errorShowMsgPerson.push("Debe seleccionar un rol para el usuario.");
 
                 if (this.errorShowMsgPerson.length) this.errorPerson = 1;
 
@@ -306,9 +371,13 @@
                 this.address = '';
                 this.phone = '';
                 this.email = '';
+                this.user = '';
+                this.password = '';
+                this.idrol = 0;
                 this.errorPerson = 0;
             },
             openModal(model, action, data = []) {
+                this.selectRol();
                 switch (model) {
                     case "person":
                         {
@@ -316,20 +385,23 @@
                                 case 'store':
                                     {
                                         this.modal = 1;
-                                        this.modalTitle = 'Registrar Cliente';
+                                        this.modalTitle = 'Registrar Usuario';
                                         this.name = '';
                                         this.document_type = 'DNI';
                                         this.document_num = '';
                                         this.address = '';
                                         this.phone = '';
                                         this.email = '';
+                                        this.user = '';
+                                        this.password = '';
+                                        this.idrol = 0;
                                         this.actionType = 1;
                                         break;
                                     }
                                 case 'update':
                                     {
                                         this.modal = 1;
-                                        this.modalTitle = 'Actualizar Cliente';
+                                        this.modalTitle = 'Actualizar Proveedor';
                                         this.actionType = 2;
                                         this.person_id = data['id'];
                                         this.name = data['name'];
@@ -338,12 +410,95 @@
                                         this.address = data['address'];
                                         this.phone = data['phone'];
                                         this.email = data['email'];
+                                        this.user = data['user'];
+                                        this.password = data['password'];
+                                        this.idrol = data['idrol'];
                                         break;
                                     }
                             }
                         }
                 }
-            }
+            },
+            activateUser(id) {
+                const swalWithBootstrapButtons = Swal.mixin({
+                    customClass: {
+                        confirmButton: 'btn btn-success',
+                        cancelButton: 'btn btn-danger'
+                    },
+                    buttonsStyling: false,
+                })
+
+                swalWithBootstrapButtons.fire({
+                    title: '¿Está seguro de activar este usuario?',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Aceptar',
+                    cancelButtonText: 'Cancelar',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.value) {
+                        let me = this;
+
+                        axios.put('/user/activate', {
+                            'id': id
+                        }).then(function (response) {
+                            me.listPerson(1, '', 'nombre');
+                            swalWithBootstrapButtons.fire(
+                                'Activado!',
+                                'El registro ha sido activado con éxito.',
+                                'success'
+                            )
+                        }).catch(function (error) {
+                            console.log(error);
+                        });
+
+                    } else if (
+                        // Read more about handling dismissals
+                        result.dismiss === Swal.DismissReason.cancel
+                    ) {
+                    }
+                })
+            },
+            deactivateUser(id) {
+                const swalWithBootstrapButtons = Swal.mixin({
+                    customClass: {
+                        confirmButton: 'btn btn-success',
+                        cancelButton: 'btn btn-danger'
+                    },
+                    buttonsStyling: false,
+                })
+
+                swalWithBootstrapButtons.fire({
+                    title: '¿Está seguro de desactivar este usuario?',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Aceptar',
+                    cancelButtonText: 'Cancelar',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.value) {
+                        let me = this;
+
+                        axios.put('/user/deactivate', {
+                            'id': id
+                        }).then(function (response) {
+                            me.listPerson(1, '', 'nombre');
+                            swalWithBootstrapButtons.fire(
+                                'Desactivado!',
+                                'El registro ha sido desactivado con éxito.',
+                                'success'
+                            )
+                        }).catch(function (error) {
+                            console.log(error);
+                        });
+
+                    } else if (
+                        // Read more about handling dismissals
+                        result.dismiss === Swal.DismissReason.cancel
+                    ) {
+                    }
+                })
+            },
         },
         mounted() {
             this.listPerson(1, this.search, this.criterion);
