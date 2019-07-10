@@ -14,10 +14,7 @@ class LoginController extends Controller
 
    //validate user's credentials
    public function login(Request $request){
-       $this->validate($request, [
-           'user' => 'required|string',
-           'password' => 'required|string'
-       ]);
+       $this->validateLogin($request);
 
        if(Auth::attempt(['user' => $request->user, 
        'password' => $request->password, 'condition'=>1])){
@@ -25,7 +22,22 @@ class LoginController extends Controller
        }
 
        //if user and pass are incorrect
-       return back()->withErrors(['user' => trans('auth.failed')]);
-       
+       return back()
+       ->withErrors(['user' => trans('auth.failed')])
+       ->withInput(request(['user']));
+
+   }
+
+   protected function validateLogin(Request $request){
+       $this->validate($request, [
+           'user' => 'required|string',
+           'password' => 'required|string'
+           ]);
+   }
+
+   public function logout (Request $request){
+       Auth::logout();
+       $request->session()->invalidate();
+       return redirect('/');
    }
 }
