@@ -28,7 +28,23 @@ Route::put('/articulo/actualizar', 'ArticuloController@update');
 Route::put('/articulo/desactivar', 'ArticuloController@desactivar');
 Route::put('/articulo/activar', 'ArticuloController@activar');
 
+Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/client', 'ClientController@index');
+Route::post('/client/store', 'ClientController@store');
+Route::put('/client/update', 'ClientController@update');
+
+Route::get('/supplier', 'SupplierController@index');
+Route::post('/supplier/store', 'SupplierController@store');
+Route::put('/supplier/update', 'SupplierController@update');
+
+Route::get('/rol', 'RolController@index');
+Route::get('/rol/selectRol', 'RolController@selectRol');
+
+Route::get('/user', 'UserController@index');
+Route::post('/user/store', 'UserController@store');
+Route::put('/user/update', 'UserController@update');
+Route::put('/user/deactivate', 'UserController@deactivate');
+Route::put('/user/activate', 'UserController@activate');
+
 Route::get('/', 'Auth\LoginController@showLoginForm');
 Route::post('/login', 'Auth\LoginController@login')->name('login');
-
-Route::get('/home', 'HomeController@index')->name('home');
